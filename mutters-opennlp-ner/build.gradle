@@ -19,6 +19,8 @@ dependencies {
     compile project(':mutters-core')
     compile project(':mutters-slots')
     compile project(':mutters-opennlp-intent')
+    compile project(':mutters-fasttext-intent')
+    compile project(':mutters-templated-intent')
 
     compile "org.apache.opennlp:opennlp-tools:$openNlpVersion"
     compile "org.slf4j:slf4j-api:$slf4jVersion"

@@ -1,17 +1,22 @@
 /* Licensed under Apache-2.0 */
 package com.rabidgremlin.mutters.bot.statemachine;
 
-import opennlp.tools.tokenize.WhitespaceTokenizer;
+import com.rabidgremlin.mutters.core.Slot;
+import com.rabidgremlin.mutters.opennlp.ner.IntentMatcherFactory;
+import com.rabidgremlin.mutters.opennlp.ner.IntentMatcherType;
+import com.rabidgremlin.mutters.opennlp.ner.TokenizerType;
+import com.rabidgremlin.mutters.slots.SlotModel;
 
-import com.rabidgremlin.mutters.core.Intent;
 import com.rabidgremlin.mutters.core.IntentMatcher;
-import com.rabidgremlin.mutters.opennlp.intent.OpenNLPIntentMatcher;
-import com.rabidgremlin.mutters.opennlp.intent.OpenNLPTokenizer;
-import com.rabidgremlin.mutters.opennlp.ner.OpenNLPSlotMatcher;
 import com.rabidgremlin.mutters.slots.LiteralSlot;
 import com.rabidgremlin.mutters.state.Guard;
 import com.rabidgremlin.mutters.state.State;
 import com.rabidgremlin.mutters.state.StateMachine;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class TaxiStateMachineBotConfiguration implements StateMachineBotConfiguration
 {
@@ -19,31 +24,21 @@ public class TaxiStateMachineBotConfiguration implements StateMachineBotConfigur
   @Override
   public IntentMatcher getIntentMatcher()
   {
-    // model was built with OpenNLP whitespace tokenizer
-    OpenNLPTokenizer tokenizer = new OpenNLPTokenizer(WhitespaceTokenizer.INSTANCE);
+    Map<String, List<Slot<?>>> intents = new HashMap<>();
+    List<Slot<?>> slots = new ArrayList<>();
+    slots.add(new LiteralSlot("Address"));
+    intents.put("OrderTaxi", slots);
+    intents.put("CancelTaxi", null);
+    intents.put("WhereTaxi", null);
+    intents.put("GaveAddress", slots);
 
-    // use Open NLP NER for slot matching
-    OpenNLPSlotMatcher slotMatcher = new OpenNLPSlotMatcher(tokenizer);
-    slotMatcher.addSlotModel("Address", "models/en-ner-address.bin");
-
-    // create intent matcher
-    OpenNLPIntentMatcher matcher = new OpenNLPIntentMatcher("models/en-cat-taxi-intents.bin", tokenizer, slotMatcher);
-
-    Intent intent = new Intent("OrderTaxi");
-    intent.addSlot(new LiteralSlot("Address"));
-    matcher.addIntent(intent);
-
-    intent = new Intent("CancelTaxi");
-    matcher.addIntent(intent);
-
-    intent = new Intent("WhereTaxi");
-    matcher.addIntent(intent);
-
-    intent = new Intent("GaveAddress");
-    intent.addSlot(new LiteralSlot("Address"));
-    matcher.addIntent(intent);
-
-    return matcher;
+    return IntentMatcherFactory.generateIntentMatcher(
+            TokenizerType.WHITESPACE,
+            IntentMatcherType.OPEN_NLP,
+            new SlotModel("Address", "models/en-ner-address.bin"),
+            "models/en-cat-taxi-intents.bin",
+            intents
+    );
   }
 
   @Override
