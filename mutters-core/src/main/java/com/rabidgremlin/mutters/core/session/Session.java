@@ -25,6 +25,14 @@ public class Session implements Serializable
 
   private HashMap<String, Object> longTermAttributes = new HashMap<>();
 
+  private Session(){
+  }
+
+  private static Session sessionInstance = new Session();
+
+  public static Session getSingletonSession(){
+    return sessionInstance;
+  }
   /**
    * Get the specified attribute.
    * 
